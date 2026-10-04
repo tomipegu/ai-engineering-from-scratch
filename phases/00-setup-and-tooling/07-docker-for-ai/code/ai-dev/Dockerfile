@@ -23,6 +23,10 @@ RUN curl -sSL https://raw.githubusercontent.com/pypa/get-pip/3b73145063be545b649
     && rm /tmp/get-pip.py \
     && update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.12 1
 
+RUN python -m venv /opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH"
+
 RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
 RUN python -m pip install --no-cache-dir \
@@ -40,11 +44,12 @@ RUN python -m pip install --no-cache-dir \
     transformers \
     datasets \
     accelerate \
-    safetensors
+    safetensors \
+    qdrant-client
 
 WORKDIR /workspace
 
-VOLUME ["/workspace", "/models"]
+VOLUME ["/workspace", "/models", "/datasets"]
 
 EXPOSE 8888
 

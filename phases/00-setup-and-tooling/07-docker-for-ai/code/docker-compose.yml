@@ -1,24 +1,30 @@
 services:
   ai-dev:
     build:
-      context: .
+      context: ./ai-dev
       dockerfile: Dockerfile
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     volumes:
-      - ../../../:/workspace
+      - ./:/workspace
       - ~/models:/models
       - ~/datasets:/data
     ports:
       - "8888:8888"
+    networks:
+      - ai-qdrant
     stdin_open: true
     tty: true
     command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    networks:
+      - flask-qdrant
+    depends_on:
+      - qdrant
 
   qdrant:
     image: qdrant/qdrant:v1.12.5
@@ -27,6 +33,14 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
+    networks:
+      - ai-qdrant
+      - flask-qdrant
 
 volumes:
   qdrant_data:
+
+networks:
+  ai-qdrant:
+  flask-qdrant:
+
